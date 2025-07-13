@@ -1,6 +1,7 @@
 import { AuthService } from './AuthService';
-import { IPaymentRequest } from '../interfaces';
+import { IPaymentRequest } from '../interfaces/IPayment.interface';
 import { HttpClient } from './HttpClient';
+import { IPesapalConfig } from '../interfaces/IPesapalConfig.interface';
 
 export class PaymentService {
   constructor(
