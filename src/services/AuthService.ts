@@ -1,5 +1,5 @@
 import { HttpClient } from './HttpClient';
-import { IPesapalConfig } from '../interfaces';
+import { IPesapalConfig } from '../interfaces/IPesapalConfig.interface';
 
 export class AuthService {
   constructor(
@@ -15,6 +15,6 @@ export class AuthService {
         consumer_secret: this.config.consumerSecret
       }
     );
-    return response.token;
+    return response.data.token;
   }
 }
