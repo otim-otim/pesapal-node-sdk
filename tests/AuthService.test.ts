@@ -1,6 +1,6 @@
 import { AuthService } from '../src/services/AuthService';
 import { HttpClient } from '../src/services/HttpClient';
-import { IPesapalConfig } from '../src/interfaces';
+import { IPesapalConfig } from '../src/interfaces/IPesapalConfig.interface';
 
 jest.mock('../src/services/HttpClient');
 

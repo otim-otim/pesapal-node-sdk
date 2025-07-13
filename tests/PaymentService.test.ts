@@ -1,7 +1,7 @@
 import { PaymentService } from '../src/services/PaymentService';
 import { AuthService } from '../src/services/AuthService';
 import { HttpClient } from '../src/services/HttpClient';
-import { IPaymentRequest } from '../src/interfaces';
+import { IPaymentRequest } from '../src/interfaces/IPayment.interface';
 
 jest.mock('../src/services/AuthService');
 jest.mock('../src/services/HttpClient');
