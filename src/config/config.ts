@@ -1,4 +1,4 @@
-import { IPesapalConfig } from '../interfaces';
+import { IPesapalConfig } from '../interfaces/IPesapalConfig.interface';
 
 const getConfig = (): IPesapalConfig => ({
   consumerKey: process.env.PESAPAL_CONSUMER_KEY!,
