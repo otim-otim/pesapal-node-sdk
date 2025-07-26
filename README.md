@@ -47,34 +47,89 @@ const payment = await paymentService.submitOrder(paymentData);
 
 2. Handle Callback
 ```typescript
-// Express.js example
+// This is a generic example that can be adapted to any framework or serverless environment
 import { paymentService } from 'pesapal-node-sdk';
 
-app.get('/pesapal-callback', async (req, res) => {
-  const status = await paymentService.getPaymentStatus(req.query.orderId);
-  
-  if (status.paymentStatus === 'COMPLETED') {
-    // Update your database
-    res.send('Payment successful!');
-  } else {
-    res.send('Payment processing...');
+// Example function that would be called with the order ID from the callback URL
+async function handlePaymentCallback(orderId: string): Promise<{ status: string; message: string }> {
+  try {
+    const status = await paymentService.getPaymentStatus(orderId);
+    
+    if (status.paymentStatus === 'COMPLETED') {
+      // Update your database or trigger other business logic
+      return { 
+        status: 'success', 
+        message: 'Payment processed successfully' 
+      };
+    } else {
+      return { 
+        status: 'pending', 
+        message: 'Payment is being processed' 
+      };
+    }
+  } catch (error) {
+    console.error('Error processing payment callback:', error);
+    return { 
+      status: 'error', 
+      message: 'Failed to process payment status' 
+    };
   }
-});
+}
+
+// Example usage with a web framework would look like:
+// app.get('/callback', async (req, res) => {
+//   const result = await handlePaymentCallback(req.query.orderId);
+//   res.json(result);
+// });
 ```
 
 3. Handle IPN (Instant Payment Notification)
 ```typescript
-app.post('/pesapal-ipn', async (req, res) => {
-  const notification = req.body;
-  
-  // Verify and process payment update
-  console.log('Payment update:', {
-    orderId: notification.order_tracking_id,
-    status: notification.payment_status
-  });
-  
-  res.status(200).end();
-});
+// This is a generic IPN handler that can be used with any framework or serverless environment
+import { IPaymentNotification } from 'pesapal-node-sdk';
+
+// Example function to process IPN data
+async function handleIPNNotification(notification: IPaymentNotification): Promise<void> {
+  try {
+    // Verify and process payment update
+    console.log('Payment update received:', {
+      orderId: notification.order_tracking_id,
+      status: notification.payment_status,
+      reference: notification.payment_method,
+      amount: notification.amount,
+      currency: notification.currency
+    });
+
+    // Update your database or trigger other business logic
+    await updateOrderStatus(notification.order_tracking_id, notification.payment_status);
+    
+    // Send confirmation email, update inventory, etc.
+    if (notification.payment_status === 'COMPLETED') {
+      await sendConfirmationEmail(notification.billing_address?.email);
+    }
+  } catch (error) {
+    console.error('Error processing IPN:', error);
+    // Implement your error handling strategy (retry logic, logging, etc.)
+    throw error;
+  }
+}
+
+// Example usage with a web framework would look like:
+// app.post('/ipn', async (req, res) => {
+//   await handleIPNNotification(req.body);
+//   res.status(200).end();
+// });
+
+// Helper functions (implement according to your needs)
+async function updateOrderStatus(orderId: string, status: string): Promise<void> {
+  // Implementation for updating order status in your database
+}
+
+async function sendConfirmationEmail(email?: string): Promise<void> {
+  // Implementation for sending confirmation email
+  if (!email) return;
+  // Email sending logic here
+}
 ```
 
 ### Error Handling
