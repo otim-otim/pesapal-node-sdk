@@ -7,7 +7,7 @@ A TypeScript package for seamless Pesapal payments integration in Node.js applic
 ## 📦 Installation
 
 ```bash
-npm install pesapal-integration axios dotenv
+npm install pesapal-node-sdk axios dotenv
 ```
 
 ⚙️ Configuration
@@ -28,7 +28,7 @@ PESAPAL_ENV=sandbox  # or 'live'
 🚀 Basic Usage
 1. Initialize Payment
 ```typescript
-import { paymentService } from 'pesapal-integration';
+import { paymentService } from 'pesapal-node-sdk';
 
 const paymentData = {
   id: 'order-' + Date.now(),
@@ -48,6 +48,8 @@ const payment = await paymentService.submitOrder(paymentData);
 2. Handle Callback
 ```typescript
 // Express.js example
+import { paymentService } from 'pesapal-node-sdk';
+
 app.get('/pesapal-callback', async (req, res) => {
   const status = await paymentService.getPaymentStatus(req.query.orderId);
   
@@ -77,6 +79,8 @@ app.post('/pesapal-ipn', async (req, res) => {
 
 ### Error Handling
 ```typescript
+import { paymentService, PesapalAuthError, PesapalApiError } from 'pesapal-node-sdk';
+
 try {
   const result = await paymentService.submitOrder(paymentData);
 } catch (error) {
@@ -92,6 +96,8 @@ try {
 
 ### Checking Payment Status
 ```typescript
+import { paymentService } from 'pesapal-node-sdk';
+
 const status = await paymentService.getPaymentStatus('order-123');
 
 console.log(`
@@ -103,6 +109,8 @@ console.log(`
 
 🧪 Testing
 ```typescript
+import { paymentService } from 'pesapal-node-sdk';
+
 // Using Jest
 test('should process payment successfully', async () => {
   const mockResponse = {
