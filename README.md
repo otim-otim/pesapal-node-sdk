@@ -1,6 +1,6 @@
 # Pesapal Node Integration
 
-![Pesapal Logo](./assets/images/pesapallogo.png)
+
 
 A TypeScript package for seamless Pesapal payments integration in Node.js powered applications. While this package is not an official pesapal package, it is a community-driven package that provides a simple and easy way to integrate Pesapal payments into your Node.js applications.
 
