@@ -13,3 +13,8 @@ export interface IPaymentRequest {
       lastName?: string;
     };
   }
+
+export interface ISubmitOrderResponse {
+    orderTrackingId: string;
+    redirectUrl: string;
+}
