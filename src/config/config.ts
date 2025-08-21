@@ -7,7 +7,6 @@ const getConfig = (): IPesapalConfig => ({
   callbackUrl: process.env.PESAPAL_CALLBACK_URL!,
   ipnUrl: process.env.PESAPAL_IPN_URL!,
   ipnId: process.env.PESAPAL_IPN_ID!,
-  env: (process.env.PESAPAL_ENV as 'sandbox' | 'live') || 'sandbox'
 });
 
 export default getConfig;

@@ -26,7 +26,6 @@ describe('PaymentService', () => {
     callbackUrl: 'https://test.com/callback',
     ipnUrl: 'https://test.com/ipn',
     ipnId: 'test-ipn-id',
-    env: 'sandbox'
   };
 
   beforeEach(() => {
