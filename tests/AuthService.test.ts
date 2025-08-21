@@ -24,7 +24,7 @@ describe('AuthService', () => {
         const auth = new AuthService(new HttpClient(mockConfig), mockConfig);
         const token = await auth.authenticate();
 
-        expect(mockPost).toHaveBeenCalledWith('/api/Auth/RequestToken', {
+        expect(mockPost).toHaveBeenCalledWith('/Auth/RequestToken', {
             consumer_key: mockConfig.consumerKey,
             consumer_secret: mockConfig.consumerSecret
         });
