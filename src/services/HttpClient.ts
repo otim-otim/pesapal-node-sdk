@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import { IPesapalConfig } from '../interfaces/IPesapalConfig.interface';
+import { IPesapalConfig } from '../interfaces';
 
 export class HttpClient {
   private client: AxiosInstance;
