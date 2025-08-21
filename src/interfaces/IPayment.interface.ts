@@ -18,3 +18,13 @@ export interface ISubmitOrderResponse {
     orderTrackingId: string;
     redirectUrl: string;
 }
+
+export interface IErrorResponse{
+  error: string;
+  status?: number;
+}
+
+export interface IPaymentStatusResponse {
+    
+}
+    
