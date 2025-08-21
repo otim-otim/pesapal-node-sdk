@@ -57,12 +57,12 @@ export class PaymentService {
         return {
           error: error.message,
           status: 'status' in error ? error.status : undefined
-        };
+        } as IErrorResponse;
       }
       return {
         error: 'An unknown error occurred',
         status: undefined
-      };
+      } as IErrorResponse;
       
     }
   }
