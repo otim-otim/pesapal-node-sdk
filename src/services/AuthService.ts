@@ -9,7 +9,7 @@ export class AuthService {
 
   async authenticate() {
     const response = await this.http.post<{ token: string }>(
-      '/api/Auth/RequestToken',
+      '/Auth/RequestToken',
       {
         consumer_key: this.config.consumerKey,
         consumer_secret: this.config.consumerSecret
