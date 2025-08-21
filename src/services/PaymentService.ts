@@ -1,5 +1,7 @@
 import { AuthService } from './AuthService';
-import { IPaymentRequest } from '../interfaces/IPayment.interface';
+import { IPaymentRequest, ISubmitOrderResponse, IPesapalOrderResponse } from '../interfaces';
+
+
 import { HttpClient } from './HttpClient';
 import { IPesapalConfig } from '../interfaces/IPesapalConfig.interface';
 
@@ -23,23 +25,55 @@ export class PaymentService {
   }
   
   async submitOrder(payment: IPaymentRequest) {
-    const token = await this.auth.authenticate();
-    return this.http.post(
-      '/Transactions/SubmitOrderRequest',
-      {
-        ...payment,
-        callback_url: payment.callbackUrl || process.env.PESAPAL_CALLBACK_URL,
-        notification_id: this.notificationId || await this.getIPNId()
-      },
-      token
-    );
+    try {
+      const token = await this.auth.authenticate();
+      const response = await this.http.post(
+        '/Transactions/SubmitOrderRequest',
+        {
+          ...payment,
+          callback_url: payment.callbackUrl || process.env.PESAPAL_CALLBACK_URL,
+          notification_id: this.notificationId || await this.getIPNId()
+        },
+        token
+      );
+      if(response.status === 200){
+        const data = response.data as IPesapalOrderResponse;
+        return {
+          orderTrackingId: data.order_tracking_id,
+          redirectUrl: data.redirect_url
+        } as ISubmitOrderResponse
+      }
+      throw new Error('Failed to submit order');
+      
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return {
+          error: error.message,
+          status: 'status' in error ? error.status : undefined
+        };
+      }
+      return {
+        error: 'An unknown error occurred',
+        status: undefined
+      };
+      
+    }
   }
 
   async getPaymentStatus(orderId: string) {
-    const token = await this.auth.authenticate();
-    return this.http.get(
-      `/Transactions/GetTransactionStatus?orderId=${orderId}`,
-      token
-    );
+    try {
+      const token = await this.auth.authenticate();
+      const res = this.http.get(
+        `/Transactions/GetTransactionStatus?orderId=${orderId}`,
+        token
+      );
+
+      return {
+
+      }
+      
+    } catch (error) {
+      
+    }
   }
 }
