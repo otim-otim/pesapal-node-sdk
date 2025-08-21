@@ -1,9 +1,14 @@
 import { AuthService } from './AuthService';
-import { IPaymentRequest, ISubmitOrderResponse, IPesapalOrderResponse } from '../interfaces';
+import { 
+  IPaymentRequest, 
+  ISubmitOrderResponse, 
+  IPesapalOrderResponse, 
+  IPesapalConfig,
+  IPesapalTransactionStatusResponse 
+} from '../interfaces';
 
 
 import { HttpClient } from './HttpClient';
-import { IPesapalConfig } from '../interfaces/IPesapalConfig.interface';
 
 export class PaymentService {
   constructor(
@@ -63,16 +68,29 @@ export class PaymentService {
   async getPaymentStatus(orderId: string) {
     try {
       const token = await this.auth.authenticate();
-      const res = this.http.get(
+      const response = await this.http.get(
         `/Transactions/GetTransactionStatus?orderId=${orderId}`,
         token
       );
 
-      return {
-
+      if(response.status === 200){
+        const data = response.data as IPesapalTransactionStatusResponse;
+        return data;
       }
+
+      throw new Error('Failed to get payment status');
       
     } catch (error) {
+      if (error instanceof Error) {
+        return {
+          error: error.message,
+          status: 'status' in error ? error.status : undefined
+        };
+      }
+      return {
+        error: 'An unknown error occurred',
+        status: undefined
+      };
       
     }
   }
