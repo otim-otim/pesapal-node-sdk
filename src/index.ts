@@ -2,8 +2,7 @@ import getConfig from './config/config';
 import { HttpClient } from './services/HttpClient';
 import { AuthService } from './services/AuthService';
 import { PaymentService } from './services/PaymentService';
-import { IPaymentRequest } from './interfaces/IPayment.interface';
-import { IPesapalConfig } from './interfaces/IPesapalConfig.interface';
+import { IPaymentRequest, IPesapalConfig } from './interfaces';
 
 const config = getConfig();
 const httpClient = new HttpClient(config);
