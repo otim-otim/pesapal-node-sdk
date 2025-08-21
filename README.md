@@ -17,16 +17,22 @@ Create a .env file in your project root:
 # Required
 PESAPAL_CONSUMER_KEY=your_key_here
 PESAPAL_CONSUMER_SECRET=your_secret_here
-PESAPAL_CALLBACK_URL=https://yourapp.com/callback
-PESAPAL_IPN_URL=https://yourapp.com/ipn
-
-# Optional (defaults shown)
-PESAPAL_API_URL=https://api.pesapal.com
+PESAPAL_CALLBACK_URL=https://yourapp.com/your_post_process_redirect_url
+PESAPAL_IPN_URL=https://yourapp.com/your_notification_url
+PESAPAL_IPN_ID=your_ipn_id_here
 PESAPAL_ENV=sandbox  # or 'live'
 ```
+Before using the SDK, make sure to initialize it with your configuration.
+These configurations are loaded from the .env file. The consumer key and secret can be found in your pesapal account dashboard, if in the live environment, else this link will provide the test credentials.
+https://developer.pesapal.com/api3-demo-keys.txt 
+The IPN ID can be set at run time, however, its more effiecient if manually generated from:
+  sandbox: https://cybqa.pesapal.com/PesapalIframe/PesapalIframe3/IpnRegistration
+
+  live: https://pay.pesapal.com/iframe/PesapalIframe3/IpnRegistration
 
 🚀 Basic Usage
-1. Initialize Payment
+
+
 ```typescript
 import { paymentService } from 'pesapal-node-sdk';
 
