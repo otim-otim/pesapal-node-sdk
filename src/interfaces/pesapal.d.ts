@@ -1,3 +1,14 @@
+export interface IPesapalConfig {
+    consumerKey: string;
+    consumerSecret: string;
+    apiUrl: string;
+    callbackUrl: string;
+    ipnUrl: string;
+    ipnId?: string;
+    env: 'sandbox' | 'live';
+  }
+
+
 export interface IPesapalOrderResponse {
     order_tracking_id: string;
     redirect_url: string;
@@ -28,3 +39,4 @@ export interface IPesapalTransactionStatusResponse {
     error: IPesapalError;
     status: string;
 }
+
