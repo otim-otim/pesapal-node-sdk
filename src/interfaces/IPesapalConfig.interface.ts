@@ -4,5 +4,6 @@ export interface IPesapalConfig {
     apiUrl: string;
     callbackUrl: string;
     ipnUrl: string;
+    ipnId?: string;
     env: 'sandbox' | 'live';
   }
