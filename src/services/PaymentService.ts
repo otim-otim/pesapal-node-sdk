@@ -4,7 +4,9 @@ import {
   ISubmitOrderResponse, 
   IPesapalOrderResponse, 
   IPesapalConfig,
-  IPesapalTransactionStatusResponse 
+  IPesapalTransactionStatusResponse,
+  IPaymentStatusResponse,
+  IErrorResponse 
 } from '../interfaces';
 
 
@@ -75,7 +77,23 @@ export class PaymentService {
 
       if(response.status === 200){
         const data = response.data as IPesapalTransactionStatusResponse;
-        return data;
+        return {
+          paymentMethod: data.payment_method,
+          amount: data.amount,
+          createdDate: data.created_date,
+          confirmationCode: data.confirmation_code,
+          paymentStatusDescription: data.payment_status_description,
+          description: data.description,
+          message: data.message,
+          paymentAccount: data.payment_account,
+          callBackUrl: data.call_back_url,
+          statusCode: data.status_code,
+          merchantReference: data.merchant_reference,
+          paymentStatusCode: data.payment_status_code,
+          currency: data.currency,
+          error: data.error,
+          status: data.status
+        } as IPaymentStatusResponse;
       }
 
       throw new Error('Failed to get payment status');
@@ -85,12 +103,12 @@ export class PaymentService {
         return {
           error: error.message,
           status: 'status' in error ? error.status : undefined
-        };
+        } as IErrorResponse;
       }
       return {
         error: 'An unknown error occurred',
         status: undefined
-      };
+      } as IErrorResponse;
       
     }
   }
