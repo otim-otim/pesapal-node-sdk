@@ -1,5 +1,5 @@
 import { HttpClient } from './HttpClient';
-import { IPesapalConfig } from '../interfaces/IPesapalConfig.interface';
+import { IPesapalConfig } from '../interfaces';
 
 export class AuthService {
   constructor(
