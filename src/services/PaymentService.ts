@@ -10,14 +10,26 @@ export class PaymentService {
     private config: IPesapalConfig
   ) {}
 
+  private notificationId: string = process.env.PESAPAL_IPN_ID || '';
+  
+  async getIPNId(): Promise<string> {
+    const token = await this.auth.authenticate();
+    const response = await this.http.post<{ipn_id: string}>('/URLSetup/RegisterIPN', {
+      url: this.config.ipnUrl || process.env.PESAPAL_IPN_URL,
+      ipn_notification_type: "POST"
+    }, token);
+    this.notificationId = response.data.ipn_id;
+    return this.notificationId;
+  }
+  
   async submitOrder(payment: IPaymentRequest) {
     const token = await this.auth.authenticate();
     return this.http.post(
-      '/v3/api/Transactions/SubmitOrderRequest',
+      '/Transactions/SubmitOrderRequest',
       {
         ...payment,
-        callback_url: payment.callbackUrl || this.config.callbackUrl,
-        notification_id: payment.notificationId || this.config.ipnUrl
+        callback_url: payment.callbackUrl || process.env.PESAPAL_CALLBACK_URL,
+        notification_id: this.notificationId || await this.getIPNId()
       },
       token
     );
@@ -26,7 +38,7 @@ export class PaymentService {
   async getPaymentStatus(orderId: string) {
     const token = await this.auth.authenticate();
     return this.http.get(
-      `/v3/api/Transactions/GetTransactionStatus?orderId=${orderId}`,
+      `/Transactions/GetTransactionStatus?orderId=${orderId}`,
       token
     );
   }
