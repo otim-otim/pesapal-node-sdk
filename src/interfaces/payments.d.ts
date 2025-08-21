@@ -24,5 +24,21 @@ export interface IErrorResponse{
   status?: number;
 }
 
-
+export interface IPaymentStatusResponse {
+  paymentMethod: string;
+  amount: number;
+  createdDate: string;
+  confirmationCode: string;
+  paymentStatusDescription: string;
+  description: string;
+  message: string;
+  paymentAccount: string;
+  callBackUrl: string;
+  statusCode: number;
+  merchantReference: string;
+  paymentStatusCode: string;
+  currency: string;
+  error: IPesapalError;
+  status: string;
+}
     
