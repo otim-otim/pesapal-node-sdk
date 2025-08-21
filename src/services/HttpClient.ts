@@ -7,7 +7,10 @@ export class HttpClient {
   constructor(private config: IPesapalConfig) {
     this.client = axios.create({
       baseURL: this.config.apiUrl,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
     });
   }
 
