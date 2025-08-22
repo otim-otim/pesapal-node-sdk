@@ -1,6 +1,6 @@
 {
   "name": "pesapal-node-sdk",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "description": "Node.js SDK for integrating with Pesapal payment gateway. Provides a simple interface for processing payments, checking status, and handling callbacks.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
