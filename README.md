@@ -10,7 +10,9 @@ A TypeScript package for seamless Pesapal payments integration in Node.js powere
 npm install pesapal-node-sdk axios dotenv
 ```
 
-⚙️ Configuration
+## ⚙️ Configuration
+
+### Option 1: Environment Variables (Recommended)
 Create a .env file in your project root:
 
 ```makefile
@@ -20,19 +22,36 @@ PESAPAL_CONSUMER_SECRET=your_secret_here
 PESAPAL_CALLBACK_URL=https://yourapp.com/your_post_process_redirect_url
 PESAPAL_IPN_URL=https://yourapp.com/your_notification_url
 PESAPAL_IPN_ID=your_ipn_id_here
-PESAPAL_ENV=sandbox  # or 'live'
+PESAPAL_ENV=live  # 'live' for production, anything else defaults to sandbox
 ```
-Before using the SDK, make sure to initialize it with your configuration.
-These configurations are loaded from the .env file. The consumer key and secret can be found in your pesapal account dashboard, if in the live environment, else this link will provide the test credentials.
-https://developer.pesapal.com/api3-demo-keys.txt 
-The IPN ID can be set at run time, however, its more effiecient if manually generated from:
-  sandbox: https://cybqa.pesapal.com/PesapalIframe/PesapalIframe3/IpnRegistration
 
-  live: https://pay.pesapal.com/iframe/PesapalIframe3/IpnRegistration
+### Option 2: Runtime Configuration
+You can also pass configuration directly when initializing:
 
-🚀 Basic Usage
+```typescript
+import { initializePesapal } from 'pesapal-node-sdk';
 
+const paymentService = initializePesapal({
+  consumerKey: 'your_key_here',
+  consumerSecret: 'your_secret_here',
+  apiUrl: 'https://pay.pesapal.com/v3/api', // or sandbox URL
+  callbackUrl: 'https://yourapp.com/callback',
+  ipnUrl: 'https://yourapp.com/ipn',
+  ipnId: 'your_ipn_id'
+});
+```
 
+### Configuration Notes
+- The consumer key and secret can be found in your Pesapal account dashboard
+- For testing, use credentials from: https://developer.pesapal.com/api3-demo-keys.txt
+- The IPN ID can be generated from:
+  - **Sandbox**: https://cybqa.pesapal.com/PesapalIframe/PesapalIframe3/IpnRegistration
+  - **Live**: https://pay.pesapal.com/iframe/PesapalIframe3/IpnRegistration
+- **Important**: All required fields must be provided, or the SDK will throw a `PesapalConfigError`
+
+## 🚀 Basic Usage
+
+### Method 1: Using Default Instance (Environment Variables)
 ```typescript
 import { paymentService } from 'pesapal-node-sdk';
 
@@ -51,10 +70,32 @@ const payment = await paymentService.submitOrder(paymentData);
 // Redirect user to payment.redirectUrl
 ```
 
-2. Handle Callback
+### Method 2: Using Custom Configuration
+```typescript
+import { initializePesapal, PesapalConfigError } from 'pesapal-node-sdk';
+
+try {
+  const paymentService = initializePesapal({
+    consumerKey: 'your_custom_key',
+    consumerSecret: 'your_custom_secret',
+    // Other fields will fall back to environment variables
+  });
+  
+  const payment = await paymentService.submitOrder(paymentData);
+  // Redirect user to payment.redirectUrl
+} catch (error) {
+  if (error instanceof PesapalConfigError) {
+    console.error('Configuration Error:', error.message);
+    // Handle missing or invalid configuration
+  }
+}
+```
+
+### Handle Callback
 ```typescript
 // This is a generic example that can be adapted to any framework or serverless environment
 import { paymentService } from 'pesapal-node-sdk';
+// Or use: import { initializePesapal } from 'pesapal-node-sdk';
 
 // Example function that would be called with the order ID from the callback URL
 async function handlePaymentCallback(orderId: string): Promise<{ status: string; message: string }> {
@@ -89,7 +130,7 @@ async function handlePaymentCallback(orderId: string): Promise<{ status: string;
 // });
 ```
 
-3. Handle IPN (Instant Payment Notification)
+### Handle IPN (Instant Payment Notification)
 ```typescript
 // This is a generic IPN handler that can be used with any framework or serverless environment
 import { IPaymentNotification } from 'pesapal-node-sdk';
@@ -138,14 +179,35 @@ async function sendConfirmationEmail(email?: string): Promise<void> {
 }
 ```
 
-### Error Handling
+## 🚨 Error Handling
+
+### Configuration Errors
+```typescript
+import { initializePesapal, PesapalConfigError } from 'pesapal-node-sdk';
+
+try {
+  const paymentService = initializePesapal({
+    consumerKey: '', // Empty value will trigger error
+    // Missing other required fields
+  });
+} catch (error) {
+  if (error instanceof PesapalConfigError) {
+    console.error('Configuration Error:', error.message);
+    // Example: "Missing or empty required configuration fields: consumerKey, consumerSecret"
+  }
+}
+```
+
+### Payment Processing Errors
 ```typescript
 import { paymentService, PesapalAuthError, PesapalApiError } from 'pesapal-node-sdk';
 
 try {
   const result = await paymentService.submitOrder(paymentData);
 } catch (error) {
-  if (error instanceof PesapalAuthError) {
+  if (error instanceof PesapalConfigError) {
+    console.error('Configuration Error:', error.message);
+  } else if (error instanceof PesapalAuthError) {
     console.error('Authentication failed');
   } else if (error instanceof PesapalApiError) {
     console.error('API Error:', error.responseData);
@@ -185,7 +247,30 @@ test('should process payment successfully', async () => {
 });
 ```
 
-📚 API Reference
+## 📚 API Reference
+
+### `initializePesapal(config?: Partial<IPesapalConfig>): PaymentService`
+Initializes the Pesapal SDK with optional configuration overrides.
+
+**Parameters:**
+- `config` (optional): Partial configuration object. Missing fields fall back to environment variables.
+
+**Returns:** PaymentService instance
+
+**Throws:** `PesapalConfigError` if required configuration is missing or empty
+
+**Example:**
+```typescript
+// Use all environment variables
+const service1 = initializePesapal();
+
+// Override specific values
+const service2 = initializePesapal({
+  consumerKey: 'custom-key',
+  apiUrl: 'https://custom-api.com'
+});
+```
+
 ### `submitOrder(payment: IPaymentRequest)`
 Submits a payment request to Pesapal
 
