@@ -1,7 +1,18 @@
+// Set environment variables before any imports
+process.env.PESAPAL_CONSUMER_KEY = 'test_key';
+process.env.PESAPAL_CONSUMER_SECRET = 'test_secret';
+process.env.PESAPAL_CALLBACK_URL = 'https://test.com/callback';
+process.env.PESAPAL_IPN_URL = 'https://test.com/ipn';
+process.env.PESAPAL_IPN_ID = 'test_ipn_id';
+process.env.PESAPAL_ENV = 'sandbox';
+
+// Mock the services before importing
+jest.mock('../src/services/HttpClient');
+jest.mock('../src/services/AuthService');
+jest.mock('../src/services/PaymentService');
+
 import { paymentService, initializePesapal, PesapalConfigError } from '../src/index';
 import { PaymentService } from '../src/services/PaymentService';
-
-jest.mock('../src/pesapal');
 
 describe('Index Module', () => {
   afterEach(() => {
@@ -36,7 +47,7 @@ describe('Index Module', () => {
   describe('Re-exports from pesapal module', () => {
     it('should re-export initializePesapal function', () => {
       // Call the re-exported function to verify it works
-      const result = initializePesapal({ consumerKey: 'test' });
+      const result = initializePesapal();
       
       // Verify it returns a PaymentService instance
       expect(result).toBeInstanceOf(PaymentService);
@@ -47,7 +58,7 @@ describe('Index Module', () => {
       const error = new PesapalConfigError('test message');
       
       // Verify it's properly constructed
-      expect(error).toBeInstanceOf(Error);
+      expect(error instanceof Error).toBe(true);
       expect(error.name).toBe('PesapalConfigError');
       expect(error.message).toBe('test message');
     });
