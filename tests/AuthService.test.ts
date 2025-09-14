@@ -11,6 +11,7 @@ describe('AuthService', () => {
         apiUrl: 'https://test.api',
         callbackUrl: 'https://test/callback',
         ipnUrl: 'https://test/ipn',
+        ipnId: 'test_ipn_id',
     };
 
     it('authenticates successfully', async () => {
