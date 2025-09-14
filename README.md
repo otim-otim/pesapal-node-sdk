@@ -7,7 +7,7 @@ A TypeScript package for seamless Pesapal payments integration in Node.js powere
 ## 📦 Installation
 
 ```bash
-npm install pesapal-node-sdk axios dotenv
+npm install pesapal-node-sdk
 ```
 
 ## ⚙️ Configuration
