@@ -11,13 +11,13 @@ jest.mock('../src/services/HttpClient');
 jest.mock('../src/services/AuthService');
 jest.mock('../src/services/PaymentService');
 
-import { initialize, getPesapalService, isInitialized, PesapalConfigError } from '../src/index';
+import { initialize, getPesapalService, isInitialized, PesapalConfigError, _resetSingleton } from '../src/index';
 import { PaymentService } from '../src/services/PaymentService';
 
 describe('Pesapal Singleton Pattern', () => {
   beforeEach(() => {
     // Reset singleton state before each test
-    jest.resetModules();
+    _resetSingleton();
     jest.clearAllMocks();
   });
 

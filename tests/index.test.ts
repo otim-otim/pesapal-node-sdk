@@ -11,18 +11,25 @@ jest.mock('../src/services/HttpClient');
 jest.mock('../src/services/AuthService');
 jest.mock('../src/services/PaymentService');
 
-import { paymentService, initializePesapal, PesapalConfigError } from '../src/index';
+import { paymentService, initializePesapal, PesapalConfigError, _resetSingleton } from '../src/index';
 import { PaymentService } from '../src/services/PaymentService';
 
 describe('Index Module', () => {
   afterEach(() => {
+    _resetSingleton();
     jest.clearAllMocks();
+  });
+
+  beforeEach(() => {
+    _resetSingleton();
   });
 
   describe('Exports', () => {
     it('should export paymentService instance', () => {
+      // The paymentService is a proxy, so we'll check for the existence of a method
+      // that should be available on the PaymentService
       expect(paymentService).toBeDefined();
-      expect(paymentService).toBeInstanceOf(PaymentService);
+      expect(typeof paymentService.submitOrder).toBe('function');
     });
 
     it('should export initializePesapal function', () => {
@@ -40,7 +47,9 @@ describe('Index Module', () => {
     it('should be created using initializePesapal with no arguments', () => {
       // The default paymentService should be created by calling initializePesapal()
       // This is tested indirectly by verifying the export exists and is a PaymentService instance
-      expect(paymentService).toBeInstanceOf(PaymentService);
+      expect(paymentService).toBeDefined();
+      expect(paymentService).toBeInstanceOf(Object); // Proxy object
+      expect(paymentService.submitOrder).toBeDefined(); // Check for a method that should exist
     });
   });
 

@@ -5,6 +5,12 @@ import { PaymentService } from './services/PaymentService';
 // Singleton instance
 let _pesapalInstance: PaymentService | null = null;
 
+// For testing purposes
+export const _resetSingleton = () => {
+  _pesapalInstance = null;
+  _defaultInstance = null;
+};
+
 /**
  * Initialize the Pesapal SDK singleton with configuration
  * @param config Optional configuration overrides
@@ -44,7 +50,7 @@ let _defaultInstance: PaymentService | null = null;
 export const paymentService = new Proxy({} as PaymentService, {
   get(target, prop) {
     if (!_defaultInstance) {
-      _defaultInstance = createPesapalService();
+      _defaultInstance = _pesapalInstance || createPesapalService();
     }
     return (_defaultInstance as any)[prop];
   }
