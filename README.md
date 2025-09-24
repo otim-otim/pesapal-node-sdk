@@ -1,40 +1,44 @@
-# Pesapal Node Integration
+# Pesapal Node.js SDK
 
-
-
-A TypeScript package for seamless Pesapal payments integration in Node.js powered applications. While this package is not an official pesapal package, it is a community-driven package that provides a simple and easy way to integrate Pesapal payments into your Node.js applications.
+A TypeScript package for seamless Pesapal payments integration in Node.js applications. This community-driven package provides a simple and type-safe way to integrate Pesapal payments into your Node.js applications.
 
 ## 📦 Installation
 
 ```bash
 npm install pesapal-node-sdk
+# or
+yarn add pesapal-node-sdk
 ```
 
 ## ⚙️ Configuration
 
 ### Option 1: Environment Variables (Recommended)
-Create a .env file in your project root:
+Create a `.env` file in your project root:
 
 ```makefile
 # Required
 PESAPAL_CONSUMER_KEY=your_key_here
 PESAPAL_CONSUMER_SECRET=your_secret_here
-PESAPAL_CALLBACK_URL=https://yourapp.com/your_post_process_redirect_url
-PESAPAL_IPN_URL=https://yourapp.com/your_notification_url
+PESAPAL_CALLBACK_URL=https://yourapp.com/callback
+PESAPAL_IPN_URL=https://yourapp.com/ipn
 PESAPAL_IPN_ID=your_ipn_id_here
-PESAPAL_ENV=live  # 'live' for production, anything else defaults to sandbox
+PESAPAL_ENV=sandbox  # 'live' for production, 'sandbox' for testing
 ```
 
 ### Option 2: Runtime Configuration
 You can also pass configuration directly when initializing:
 
 ```typescript
-import { initializePesapal } from 'pesapal-node-sdk';
+import { initialize } from 'pesapal-node-sdk';
 
-const paymentService = initializePesapal({
+// Initialize with configuration
+const pesapal = initialize({
   consumerKey: 'your_key_here',
   consumerSecret: 'your_secret_here',
-  apiUrl: 'https://pay.pesapal.com/v3/api', // or sandbox URL
+  environment: 'sandbox', // or 'live' for production
+  
+  // Optional overrides
+  apiUrl: 'https://cybqa.pesapal.com/v3/api', // sandbox URL
   callbackUrl: 'https://yourapp.com/callback',
   ipnUrl: 'https://yourapp.com/ipn',
   ipnId: 'your_ipn_id'
@@ -42,92 +46,147 @@ const paymentService = initializePesapal({
 ```
 
 ### Configuration Notes
-- The consumer key and secret can be found in your Pesapal account dashboard
-- For testing, use credentials from: https://developer.pesapal.com/api3-demo-keys.txt
-- The IPN ID can be generated from:
-  - **Sandbox**: https://cybqa.pesapal.com/PesapalIframe/PesapalIframe3/IpnRegistration
-  - **Live**: https://pay.pesapal.com/iframe/PesapalIframe3/IpnRegistration
-- **Important**: All required fields must be provided, or the SDK will throw a `PesapalConfigError`
+- Get your consumer key and secret from your [Pesapal account dashboard](https://developer.pesapal.com/)
+- For testing, use sandbox credentials from: [Pesapal Demo Keys](https://developer.pesapal.com/api3-demo-keys.txt)
+- Generate IPN ID from:
+  - **Sandbox**: [Sandbox IPN Registration](https://cybqa.pesapal.com/PesapalIframe/PesapalIframe3/IpnRegistration)
+  - **Live**: [Live IPN Registration](https://pay.pesapal.com/iframe/PesapalIframe3/IpnRegistration)
 
 ## 🚀 Basic Usage
 
-### Method 1: Using Default Instance (Environment Variables)
+### 1. Initialize the SDK
+
 ```typescript
-import { paymentService } from 'pesapal-node-sdk';
+import { initialize, getPesapalService } from 'pesapal-node-sdk';
 
-const paymentData = {
-  id: 'order-' + Date.now(),
-  currency: 'KES',
-  amount: 1000,
-  description: 'Online Purchase',
-  billingAddress: {
-    email: 'customer@example.com',
-    phoneNumber: '+254712345678'
-  }
-};
+// Initialize with environment variables
+const pesapal = initialize();
 
-const payment = await paymentService.submitOrder(paymentData);
-// Redirect user to payment.redirectUrl
+// Or with explicit configuration
+// const pesapal = initialize({
+//   consumerKey: 'your_key',
+//   consumerSecret: 'your_secret',
+//   environment: 'sandbox'
+// });
 ```
 
-### Method 2: Using Custom Configuration
-```typescript
-import { initializePesapal, PesapalConfigError } from 'pesapal-node-sdk';
+### 2. Submit a Payment Request
 
-try {
-  const paymentService = initializePesapal({
-    consumerKey: 'your_custom_key',
-    consumerSecret: 'your_custom_secret',
-    // Other fields will fall back to environment variables
-  });
-  
-  const payment = await paymentService.submitOrder(paymentData);
-  // Redirect user to payment.redirectUrl
-} catch (error) {
-  if (error instanceof PesapalConfigError) {
-    console.error('Configuration Error:', error.message);
-    // Handle missing or invalid configuration
+```typescript
+import { IPaymentRequest } from 'pesapal-node-sdk';
+
+async function createPayment() {
+  const paymentData: IPaymentRequest = {
+    id: `order-${Date.now()}`,
+    currency: 'KES',
+    amount: 1000,
+    description: 'Online Purchase',
+    callbackUrl: 'https://yourapp.com/callback',
+    notificationId: 'your_ipn_id',
+    billingAddress: {
+      emailAddress: 'customer@example.com',
+      phoneNumber: '+254712345678',
+      firstName: 'John',
+      lastName: 'Doe',
+      line1: '123 Main St',
+      city: 'Nairobi',
+      country: 'KE'
+    }
+  };
+
+  try {
+    // Submit payment
+    const payment = await pesapal.submitOrder(paymentData);
+    console.log('Payment URL:', payment.redirectUrl);
+    
+    // Redirect user to payment.redirectUrl
+    return payment;
+  } catch (error) {
+    console.error('Payment submission failed:', error);
+    throw error;
   }
 }
 ```
 
-### Handle Callback
-```typescript
-// This is a generic example that can be adapted to any framework or serverless environment
-import { paymentService } from 'pesapal-node-sdk';
-// Or use: import { initializePesapal } from 'pesapal-node-sdk';
+### 3. Handle Payment Callback
 
-// Example function that would be called with the order ID from the callback URL
-async function handlePaymentCallback(orderId: string): Promise<{ status: string; message: string }> {
+```typescript
+import { getPesapalService } from 'pesapal-node-sdk';
+
+// Example with Express
+app.get('/payment/callback', async (req, res) => {
+  const { orderTrackingId, orderMerchantReference } = req.query;
+  
+  if (!orderTrackingId || !orderMerchantReference) {
+    return res.status(400).json({ error: 'Missing required parameters' });
+  }
+
   try {
-    const status = await paymentService.getPaymentStatus(orderId);
+    // Get the singleton service instance
+    const pesapal = getPesapalService();
     
+    // Get payment status
+    const status = await pesapal.getTransactionStatus(orderTrackingId as string);
+    
+    // Update your database with the payment status
+    await updateOrderStatus(orderMerchantReference as string, status.paymentStatus);
+    
+    // Redirect to success/failure page
     if (status.paymentStatus === 'COMPLETED') {
-      // Update your database or trigger other business logic
-      return { 
-        status: 'success', 
-        message: 'Payment processed successfully' 
-      };
+      return res.redirect('/payment/success');
     } else {
-      return { 
-        status: 'pending', 
-        message: 'Payment is being processed' 
-      };
+      return res.redirect('/payment/pending');
     }
   } catch (error) {
-    console.error('Error processing payment callback:', error);
-    return { 
-      status: 'error', 
-      message: 'Failed to process payment status' 
-    };
+    console.error('Error processing callback:', error);
+    return res.status(500).json({ error: 'Failed to process payment status' });
   }
-}
+});
+```
 
-// Example usage with a web framework would look like:
-// app.get('/callback', async (req, res) => {
-//   const result = await handlePaymentCallback(req.query.orderId);
-//   res.json(result);
-// });
+### 4. Handle IPN (Instant Payment Notification)
+
+```typescript
+import { getPesapalService } from 'pesapal-node-sdk';
+
+// Example IPN handler with Express
+app.post('/api/pesapal/ipn', async (req, res) => {
+  const { OrderNotificationType, OrderTrackingId, OrderMerchantReference } = req.body;
+  
+  if (!OrderTrackingId || !OrderMerchantReference) {
+    return res.status(400).json({ status: 'error', message: 'Missing required parameters' });
+  }
+
+  try {
+    const pesapal = getPesapalService();
+    const status = await pesapal.getTransactionStatus(OrderTrackingId);
+    
+    // Update your database with the latest status
+    await updateOrderInDatabase(OrderMerchantReference, {
+      status: status.paymentStatus,
+      paymentMethod: status.paymentMethod,
+      amount: status.amount,
+      currency: status.currency,
+      lastUpdated: new Date()
+    });
+    
+    // Acknowledge receipt of the IPN
+    res.status(200).json({
+      status: 'success',
+      message: 'IPN received and processed',
+      orderId: OrderMerchantReference,
+      paymentStatus: status.paymentStatus
+    });
+    
+  } catch (error) {
+    console.error('IPN processing error:', error);
+    res.status(500).json({ 
+      status: 'error', 
+      message: 'Failed to process IPN',
+      error: error.message 
+    });
+  }
+});
 ```
 
 ### Handle IPN (Instant Payment Notification)
