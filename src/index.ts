@@ -1,4 +1,10 @@
-import { IPaymentRequest, IPesapalConfig } from './interfaces';
+import { 
+  IErrorResponse, 
+  IPaymentRequest, 
+  IPaymentStatusResponse, 
+  IPesapalConfig, 
+  ISubmitOrderResponse 
+} from './interfaces';
 import { initializePesapal as createPesapalService, PesapalConfigError } from './pesapal';
 import { PaymentService } from './services/PaymentService';
 
@@ -60,5 +66,8 @@ export { PesapalConfigError };
 
 export type {
   IPaymentRequest,
-  IPesapalConfig
+  IPesapalConfig,
+  ISubmitOrderResponse,
+  IErrorResponse,
+  IPaymentStatusResponse
 };
