@@ -52,6 +52,121 @@ const pesapal = initialize({
   - **Sandbox**: [Sandbox IPN Registration](https://cybqa.pesapal.com/PesapalIframe/PesapalIframe3/IpnRegistration)
   - **Live**: [Live IPN Registration](https://pay.pesapal.com/iframe/PesapalIframe3/IpnRegistration)
 
+## 📋 Type Reference
+
+The SDK provides TypeScript type definitions for better development experience. Here are the main types you can use:
+
+### Core Types
+
+#### `IPaymentRequest`
+```typescript
+interface IPaymentRequest {
+  id: string;                    // Unique order ID
+  currency: string;              // Currency code (e.g., 'KES')
+  amount: number;                // Payment amount
+  description: string;           // Order description
+  callbackUrl: string;           // Callback URL for payment status
+  notificationId: string;        // IPN ID for payment notifications
+  billingAddress: {
+    emailAddress: string;        // Customer's email
+    phoneNumber?: string;        // Customer's phone number
+    firstName?: string;          // Customer's first name
+    lastName?: string;           // Customer's last name
+    // ... other address fields
+  };
+  // ... other fields
+}
+```
+
+#### `ISubmitOrderResponse`
+```typescript
+interface ISubmitOrderResponse {
+  orderTrackingId: string;      // Unique tracking ID for the order
+  redirectUrl: string;          // URL to redirect customer for payment
+  status: string;               // Order status
+}
+```
+
+#### `IPaymentStatusResponse`
+```typescript
+interface IPaymentStatusResponse {
+  paymentMethod: string;        // Payment method used
+  amount: number;               // Payment amount
+  createdDate: string;          // ISO date string of payment creation
+  paymentStatus: string;        // Current payment status
+  // ... other status fields
+}
+```
+
+#### `IErrorResponse`
+```typescript
+interface IErrorResponse {
+  error: string;               // Error message
+  status?: number;             // Optional HTTP status code
+  // ... other error details
+}
+```
+
+### Configuration Types
+
+#### `IPesapalConfig`
+```typescript
+interface IPesapalConfig {
+  consumerKey: string;         // Your Pesapal consumer key
+  consumerSecret: string;      // Your Pesapal consumer secret
+  environment: 'sandbox' | 'production';
+  // ... other configuration fields
+}
+```
+
+### Usage Example with Types
+
+```typescript
+import { 
+  initialize, 
+  getPesapalService, 
+  IPaymentRequest, 
+  ISubmitOrderResponse,
+  IPaymentStatusResponse
+} from 'pesapal-node-sdk';
+
+// Initialize with type-safe config
+const pesapal = initialize({
+  consumerKey: 'your_key',
+  consumerSecret: 'your_secret',
+  environment: 'sandbox'
+});
+
+// Create payment with typed request
+const paymentData: IPaymentRequest = {
+  id: `order-${Date.now()}`,
+  currency: 'KES',
+  amount: 1000,
+  description: 'Test Payment',
+  callbackUrl: 'https://yourapp.com/callback',
+  notificationId: 'your_ipn_id',
+  billingAddress: {
+    emailAddress: 'customer@example.com'
+  }
+};
+
+// Handle response with proper type
+async function processPayment(): Promise<void> {
+  try {
+    const response: ISubmitOrderResponse = await pesapal.submitOrder(paymentData);
+    console.log('Payment URL:', response.redirectUrl);
+    
+    // Later, check status with type
+    const status: IPaymentStatusResponse = await pesapal.getTransactionStatus(response.orderTrackingId);
+    console.log('Payment status:', status.paymentStatus);
+    
+  } catch (error) {
+    const err = error as IErrorResponse;
+    console.error('Payment error:', err.error);
+  }
+}
+```
+
 ## 🚀 Basic Usage
 
 ### 1. Initialize the SDK
