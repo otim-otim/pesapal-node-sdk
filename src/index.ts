@@ -17,7 +17,7 @@ import {
 } from './interfaces';
 import { PesapalApiError } from './services/errors';
 import { initializePesapal as createPesapalService, PesapalConfigError } from './pesapal';
-import { PaymentService } from './services/PaymentService';
+import { PaymentService, PAYMENT_PENDING_ERROR_CODE } from './services/PaymentService';
 
 // Singleton instance
 let _pesapalInstance: PaymentService | null = null;
@@ -73,7 +73,7 @@ export const paymentService = new Proxy({} as PaymentService, {
   }
 });
 
-export { PesapalConfigError, PesapalApiError };
+export { PesapalConfigError, PesapalApiError, PAYMENT_PENDING_ERROR_CODE };
 
 export type {
   IPaymentRequest,

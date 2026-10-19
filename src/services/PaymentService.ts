@@ -20,6 +20,9 @@ import {
 import { HttpClient } from './HttpClient';
 import { assertPesapalSuccess, PesapalApiError, toErrorResponse } from './errors';
 
+// Pesapal reports an order that hasn't been paid yet as an error with this code.
+export const PAYMENT_PENDING_ERROR_CODE = 'payment_details_not_found';
+
 export class PaymentService {
   constructor(
     private auth: AuthService,
@@ -163,7 +166,11 @@ export class PaymentService {
         token
       );
       const data = response.data;
-      assertPesapalSuccess(data, 'Failed to get payment status');
+      // An unpaid order isn't a failure: return it as a normal status (statusCode 0)
+      // and keep Pesapal's error object so callers can tell it apart from INVALID.
+      if (data?.error?.code !== PAYMENT_PENDING_ERROR_CODE) {
+        assertPesapalSuccess(data, 'Failed to get payment status');
+      }
       const subscription = data.subscription_transaction_info;
 
       return {
@@ -176,7 +183,7 @@ export class PaymentService {
         message: data.message,
         paymentAccount: data.payment_account,
         callBackUrl: data.call_back_url,
-        statusCode: data.status_code,
+        statusCode: data.status_code ?? 0,
         merchantReference: data.merchant_reference,
         paymentStatusCode: data.payment_status_code,
         currency: data.currency,

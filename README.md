@@ -140,7 +140,7 @@ app.get('/payment/callback', async (req, res) => {
     return res.status(502).json({ error: status.error });
   }
 
-  // statusCode: 0 = INVALID, 1 = COMPLETED, 2 = FAILED, 3 = REVERSED
+  // statusCode: 0 = INVALID or not paid yet, 1 = COMPLETED, 2 = FAILED, 3 = REVERSED
   return res.redirect(status.statusCode === 1 ? '/payment/success' : '/payment/pending');
 });
 ```
@@ -303,6 +303,17 @@ interface ISubmitOrderResponse {
 ### `getPaymentStatus(orderTrackingId: string): Promise<IPaymentStatusResponse | IErrorResponse>`
 Takes the `orderTrackingId` returned by `submitOrder()` (or sent in the callback/IPN), not your merchant reference.
 
+An order that hasn't been paid yet is returned as a normal status with `statusCode: 0`, not as an error. Pesapal's `error` object is kept on the result, so you can tell an unpaid order apart from an invalid one:
+
+```typescript
+import { PAYMENT_PENDING_ERROR_CODE } from 'pesapal-node-sdk';
+
+const status = await pesapal.getPaymentStatus(orderTrackingId);
+if ('statusCode' in status && status.error?.code === PAYMENT_PENDING_ERROR_CODE) {
+  // Not paid yet: check again later
+}
+```
+
 ```typescript
 interface IPaymentStatusResponse {
   paymentMethod: string;
@@ -314,7 +325,7 @@ interface IPaymentStatusResponse {
   message: string;
   paymentAccount: string;
   callBackUrl: string;
-  statusCode: number;                // 0 INVALID, 1 COMPLETED, 2 FAILED, 3 REVERSED
+  statusCode: number;                // 0 INVALID or not paid yet, 1 COMPLETED, 2 FAILED, 3 REVERSED
   merchantReference: string;
   paymentStatusCode: string;
   currency: string;
