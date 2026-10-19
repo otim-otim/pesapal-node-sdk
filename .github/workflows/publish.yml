@@ -1,0 +1,43 @@
+name: Publish to npm
+
+# Publishes via npm trusted publishing (OIDC), so no NPM_TOKEN secret is needed.
+# See https://docs.npmjs.com/trusted-publishers
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+  id-token: write # Required for OIDC trusted publishing and provenance
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+          package-manager-cache: false
+
+      # Trusted publishing requires npm CLI 11.5.1 or later
+      - run: npm install -g npm@^11.5.1
+
+      - name: Check tag matches package.json version
+        run: |
+          PACKAGE_VERSION="v$(node -p "require('./package.json').version")"
+          if [ "$PACKAGE_VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match package.json version $PACKAGE_VERSION"
+            exit 1
+          fi
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+
+      # Lifecycle scripts already ran above; skip re-running them on publish
+      - run: npm publish --ignore-scripts
