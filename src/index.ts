@@ -3,8 +3,19 @@ import {
   IPaymentRequest, 
   IPaymentStatusResponse, 
   IPesapalConfig, 
-  ISubmitOrderResponse 
+  ISubmitOrderResponse,
+  IBillingAddress,
+  ISubscriptionDetails,
+  ISubscriptionTransactionInfo,
+  IRegisterIPNRequest,
+  IIpnResponse,
+  IRefundRequest,
+  IStatusMessageResponse,
+  PesapalIpnNotificationType,
+  PesapalRedirectMode,
+  PesapalSubscriptionFrequency
 } from './interfaces';
+import { PesapalApiError } from './services/errors';
 import { initializePesapal as createPesapalService, PesapalConfigError } from './pesapal';
 import { PaymentService } from './services/PaymentService';
 
@@ -62,12 +73,22 @@ export const paymentService = new Proxy({} as PaymentService, {
   }
 });
 
-export { PesapalConfigError };
+export { PesapalConfigError, PesapalApiError };
 
 export type {
   IPaymentRequest,
   IPesapalConfig,
   ISubmitOrderResponse,
   IErrorResponse,
-  IPaymentStatusResponse
+  IPaymentStatusResponse,
+  IBillingAddress,
+  ISubscriptionDetails,
+  ISubscriptionTransactionInfo,
+  IRegisterIPNRequest,
+  IIpnResponse,
+  IRefundRequest,
+  IStatusMessageResponse,
+  PesapalIpnNotificationType,
+  PesapalRedirectMode,
+  PesapalSubscriptionFrequency
 };
