@@ -287,6 +287,74 @@ describe('PaymentService', () => {
     });
   });
 
+  it('returns a normal status for an order that has not been paid yet', async () => {
+    const pendingError = { error_type: 'api_error', code: 'payment_details_not_found', message: 'Pending Payment' };
+    const mockHttp = {
+      get: jest.fn().mockResolvedValue({
+        status: 200,
+        data: {
+          payment_method: '',
+          amount: 100,
+          payment_status_description: 'INVALID',
+          status_code: 0,
+          merchant_reference: 'order-123',
+          currency: 'KES',
+          error: pendingError,
+          status: '500'
+        }
+      })
+    };
+    const { service } = createService(mockHttp);
+
+    const status = await service.getPaymentStatus('tracking-123');
+
+    expect(status).toMatchObject({
+      statusCode: 0,
+      paymentStatusDescription: 'INVALID',
+      merchantReference: 'order-123',
+      error: pendingError
+    });
+  });
+
+  it('defaults statusCode to 0 when a pending reply omits status_code', async () => {
+    const mockHttp = {
+      get: jest.fn().mockResolvedValue({
+        status: 200,
+        data: {
+          error: { error_type: 'api_error', code: 'payment_details_not_found', message: 'Pending Payment' },
+          status: '500'
+        }
+      })
+    };
+    const { service } = createService(mockHttp);
+
+    const status = await service.getPaymentStatus('tracking-123');
+
+    expect(status).toMatchObject({ statusCode: 0 });
+  });
+
+  it('still returns an error for other status lookup failures', async () => {
+    const mockHttp = {
+      get: jest.fn().mockResolvedValue({
+        status: 200,
+        data: {
+          error: { error_type: 'api_error', code: 'invalid_order_tracking_id', message: 'Invalid order tracking id' },
+          status: '500'
+        }
+      })
+    };
+    const { service } = createService(mockHttp);
+
+    const status = await service.getPaymentStatus('bad-id');
+
+    expect(status).toEqual({
+      error: 'Invalid order tracking id',
+      status: 500,
+      code: 'invalid_order_tracking_id',
+      errorType: 'api_error'
+    });
+  });
+
   it('requests a refund', async () => {
     const mockHttp = {
       post: jest.fn().mockResolvedValue({ data: { status: '200', message: 'Refund request successfully' } })

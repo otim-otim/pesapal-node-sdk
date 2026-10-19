@@ -2,6 +2,12 @@
 
 All notable changes to the `pesapal-node-sdk` will be documented in this file.
 
+## [3.1.1] - 2026-10-20
+
+### 🐛 Bug Fixes
+- **getPaymentStatus**: an order that hasn't been paid yet is no longer returned as an error. Pesapal reports it with an `error` object (`code: 'payment_details_not_found'`, message "Pending Payment"), which 3.1.0 treated as a failure. It now comes back as a normal `IPaymentStatusResponse` with `statusCode: 0`, and the Pesapal `error` object is kept, so `status.error.code === PAYMENT_PENDING_ERROR_CODE` tells an unpaid order apart from an invalid one. Other status lookup errors are still returned as `IErrorResponse`.
+- `PAYMENT_PENDING_ERROR_CODE` is exported.
+
 ## [3.1.0] - 2026-10-19
 
 Aligns the SDK with the [Pesapal API 3.0 reference](https://developer.pesapal.com/how-to-integrate/e-commerce/api-30-json/api-reference).
