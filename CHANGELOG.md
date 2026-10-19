@@ -2,6 +2,32 @@
 
 All notable changes to the `pesapal-node-sdk` will be documented in this file.
 
+## [3.1.0] - 2026-10-19
+
+Aligns the SDK with the [Pesapal API 3.0 reference](https://developer.pesapal.com/how-to-integrate/e-commerce/api-30-json/api-reference).
+
+### 🐛 Bug Fixes
+- **submitOrder**: the billing address is now sent as `billing_address` with snake_case fields (`email_address`, `phone_number`, `first_name`, ...). Previously the camelCase `billingAddress` object was sent as-is and Pesapal ignored it. The camelCase `callbackUrl`/`notificationId` keys are no longer leaked into the request body.
+- **getPaymentStatus**: queries `GetTransactionStatus?orderTrackingId=` (previously `?orderId=`, which Pesapal answers with 404). The parameter is the order tracking ID returned by `submitOrder`.
+- Pesapal errors returned inside HTTP 200 responses (an `error` object or a non-200 `status`) are now reported as errors instead of being treated as success.
+- The `ipnId` and `callbackUrl` config values are now used; previously only the environment variables were read.
+- Error responses now include Pesapal's error message, `code` and `errorType` rather than the generic Axios message.
+- The published type definitions now include the interfaces. Previously `dist/index.d.ts` imported `./interfaces`, which was missing from the package.
+
+### 🚀 New Features
+- `requestRefund()` for `Transactions/RefundRequest`.
+- `cancelOrder()` for `Transactions/CancelOrder`.
+- `registerIPN()` (with `GET` or `POST` notifications) and `getRegisteredIPNs()` for `URLSetup/GetIpnList`.
+- `submitOrder` supports `redirectMode`, `cancellationUrl`, `branch`, `accountNumber` and `subscriptionDetails` (recurring payments), and all `billing_address` fields (`middleName`, `line1`, `line2`, `city`, `state`, `postalCode`, `zipCode`).
+- `submitOrder` returns `merchantReference`.
+- `getPaymentStatus` returns `subscriptionTransactionInfo` for recurring payments.
+- Access tokens are cached until shortly before their `expiryDate` instead of being requested on every call.
+- `PesapalApiError` and the new request/response types are exported.
+
+### ⚠️ Type Changes
+- `IPaymentRequest.billingAddress` is now required, and must contain `emailAddress` or `phoneNumber`, matching Pesapal's requirements. Orders without one were already rejected by Pesapal; they are now rejected before the request is sent.
+- `billingAddress.email` is deprecated in favour of `billingAddress.emailAddress` (both are accepted).
+
 ## [3.0.0] - 2025-09-27
 
 ### 🚀 New Features
